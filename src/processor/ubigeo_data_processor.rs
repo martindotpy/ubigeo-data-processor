@@ -4,6 +4,7 @@ use serde::Deserialize;
 use std::collections::HashMap;
 use std::fs::File;
 use std::io::BufReader;
+use std::io::Cursor;
 
 use crate::ubigeo::UbigeoMap;
 
@@ -56,11 +57,29 @@ fn to_namecase(s: &str) -> String {
 }
 
 pub fn process_ubigeo_data(input_path: &str) -> Result<UbigeoMap> {
-    // Open the CSV file with buffered reader for performance
-    let file =
-        File::open(input_path).with_context(|| format!("Failed to open file: {}", input_path))?;
-    let mut rdr = Reader::from_reader(BufReader::new(file));
+    // Choose source: either the filesystem or the embedded CSV when the
+    // default data path is requested and the `data` feature is enabled.
+    let rdr = {
+        #[cfg(feature = "data")]
+        {
+            if input_path == "data/ubigeos.csv" {
+                let bytes = crate::data::embedded_ubigeos_csv();
 
+                return _process_reader(Reader::from_reader(Cursor::new(bytes)));
+            }
+        }
+
+        // Fallback to reading from filesystem
+        let file = File::open(input_path)
+            .with_context(|| format!("Failed to open file: {}", input_path))?;
+        Reader::from_reader(BufReader::new(file))
+    };
+
+    // If we reached here, `rdr` is ready to be used
+    _process_reader(rdr)
+}
+
+fn _process_reader<R: std::io::Read>(mut rdr: Reader<R>) -> Result<UbigeoMap> {
     // Initialize the Ubigeo map
     let mut ubigeo_map: UbigeoMap = HashMap::new();
 
