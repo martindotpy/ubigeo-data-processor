@@ -7,6 +7,7 @@ use anyhow::{Context, Result};
 use clap::{CommandFactory, Parser};
 
 mod command;
+#[cfg(feature = "data")]
 mod data;
 mod format;
 mod processor;

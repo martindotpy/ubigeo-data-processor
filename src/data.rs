@@ -14,8 +14,5 @@ pub fn embedded_ubigeos_csv() -> &'static [u8] {
     file.contents()
 }
 
-#[cfg(not(feature = "data"))]
-/// When `data` feature is disabled, this function is not available.
-pub fn embedded_ubigeos_csv() -> &'static [u8] {
-    compile_error!("embedded_ubigeos_csv is only available with feature \"data\"");
-}
+// When `data` feature is disabled this file is not compiled because
+// the `data` module is conditionally declared with `#[cfg(feature = "data")]`.

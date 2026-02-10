@@ -2,7 +2,7 @@
 name = "ubigeo"
 version = "0.1.0"
 edition = "2024"
-description = "Cli tool to get ubigeo data from Peru"
+description = "Cli tool to get ubigeo data from Peru."
 
 [dependencies]
 anyhow = "1.0.100"

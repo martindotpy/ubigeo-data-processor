@@ -4,6 +4,7 @@ use serde::Deserialize;
 use std::collections::HashMap;
 use std::fs::File;
 use std::io::BufReader;
+#[cfg(feature = "data")]
 use std::io::Cursor;
 
 use crate::ubigeo::UbigeoMap;
