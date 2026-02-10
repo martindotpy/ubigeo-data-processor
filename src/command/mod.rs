@@ -1,4 +1,5 @@
-use clap::{Parser, Subcommand, ValueEnum};
+use clap::{Command, Parser, Subcommand, ValueEnum};
+use clap_complete::{Shell, generate};
 use strum_macros::{Display, EnumString, IntoStaticStr};
 
 #[derive(Parser, Debug)]
@@ -9,11 +10,16 @@ pub struct Cli {
     pub input: String,
 
     #[command(subcommand)]
-    pub command: FormatCommand,
+    pub command: Option<AppCommand>,
 }
 
 #[derive(Subcommand, Debug, Clone)]
-pub enum FormatCommand {
+pub enum AppCommand {
+    /// Generate shell completions
+    Completions {
+        #[arg(value_enum)]
+        generator: Shell,
+    },
     /// Export data to CSV format
     Csv {
         /// Output file path
@@ -54,4 +60,16 @@ pub enum SqlDialect {
     Postgres,
     Mysql,
     Sqlite,
+}
+
+pub fn print_completion<G>(generator: G, cmd: &mut Command)
+where
+    G: clap_complete::Generator,
+{
+    generate(
+        generator,
+        cmd,
+        cmd.get_name().to_string(),
+        &mut std::io::stdout(),
+    );
 }

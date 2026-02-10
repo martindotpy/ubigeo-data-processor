@@ -1,30 +1,42 @@
+use crate::{
+    command::{AppCommand, Cli, print_completion},
+    format::{csv::CsvFormatter, formatter::Formatter, json::JsonFormatter, sql::SqlFormatter},
+    processor::ubigeo_data_processor::process_ubigeo_data,
+};
+use anyhow::{Context, Result};
+use clap::{CommandFactory, Parser};
+
 mod command;
 mod format;
 mod processor;
 mod ubigeo;
 
-use anyhow::{Context, Result};
-use clap::Parser;
-
-use crate::{
-    command::{Cli, FormatCommand},
-    format::{csv::CsvFormatter, formatter::Formatter, json::JsonFormatter, sql::SqlFormatter},
-    processor::ubigeo_data_processor::process_ubigeo_data,
-};
-
 fn main() -> Result<()> {
     // Parse command line arguments
     let cli = Cli::parse();
 
+    // Ensure a subcommand was provided
+    let Some(command) = cli.command else {
+        Cli::command().print_help()?;
+
+        std::process::exit(1);
+    };
+
+    // Handle generate subcommand early to avoid processing data
+    if let AppCommand::Completions { generator } = &command {
+        print_completion(generator.clone(), &mut Cli::command());
+
+        return Ok(());
+    }
+
     // Load and process ubigeo data
-    let ubigeo_tree = process_ubigeo_data(&cli.input)
-        .context("Failed to process ubigeo data")?;
+    let ubigeo_tree = process_ubigeo_data(&cli.input).context("Failed to process ubigeo data")?;
 
     // Handle commands
-    let (formatter, output_path): (Box<dyn Formatter>, String) = match cli.command {
-        FormatCommand::Csv { output } => (Box::new(CsvFormatter), output),
-        FormatCommand::Json { output } => (Box::new(JsonFormatter), output),
-        FormatCommand::Sql {
+    let (formatter, output_path): (Box<dyn Formatter>, String) = match command {
+        AppCommand::Csv { output } => (Box::new(CsvFormatter), output),
+        AppCommand::Json { output } => (Box::new(JsonFormatter), output),
+        AppCommand::Sql {
             output,
             dialect,
             table_department,
@@ -39,6 +51,7 @@ fn main() -> Result<()> {
             }),
             output,
         ),
+        AppCommand::Completions { .. } => unreachable!(),
     };
 
     // Format and output data
