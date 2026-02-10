@@ -1,9 +1,24 @@
+use clap::builder::Styles;
+use clap::builder::styling::{AnsiColor, Effects};
 use clap::{Command, Parser, Subcommand, ValueEnum};
 use clap_complete::{Shell, generate};
 use strum_macros::{Display, EnumString, IntoStaticStr};
 
+// Configures Clap v3-style help menu colors
+const STYLES: Styles = Styles::styled()
+    .header(AnsiColor::Green.on_default().effects(Effects::BOLD))
+    .usage(AnsiColor::Green.on_default().effects(Effects::BOLD))
+    .literal(AnsiColor::Cyan.on_default().effects(Effects::BOLD))
+    .placeholder(AnsiColor::Cyan.on_default());
+
 #[derive(Parser, Debug)]
-#[command(version, about, long_about = None)]
+#[command(
+    version,
+    about,
+    long_about = None,
+    after_help = "Use `ubigeo help` for more details.",
+    styles = STYLES
+)]
 pub struct Cli {
     /// Path to the input CSV file containing ubigeo data
     #[arg(short, long, global = true, default_value = "data/ubigeos.csv")]

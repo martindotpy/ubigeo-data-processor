@@ -1,4 +1,4 @@
-use crate::format::formatter::{create_output_file, Formatter};
+use crate::format::formatter::{Formatter, create_output_file};
 use anyhow::Result;
 
 pub struct JsonFormatter;

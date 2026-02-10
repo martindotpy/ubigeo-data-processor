@@ -1,5 +1,5 @@
 use crate::command::SqlDialect;
-use crate::format::formatter::{create_output_file, Formatter};
+use crate::format::formatter::{Formatter, create_output_file};
 use anyhow::Result;
 use std::io::Write;
 
