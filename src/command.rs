@@ -10,11 +10,11 @@ pub struct Cli {
     pub input: String,
 
     #[command(subcommand)]
-    pub command: Option<AppCommand>,
+    pub subcommand: Option<AppSubcommand>,
 }
 
 #[derive(Subcommand, Debug, Clone)]
-pub enum AppCommand {
+pub enum AppSubcommand {
     /// Generate shell completions
     Completions {
         #[arg(value_enum)]
